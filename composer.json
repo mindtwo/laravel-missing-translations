@@ -1,0 +1,47 @@
+{
+    "name": "mindtwo/missing-translations",
+    "type": "library",
+    "description": "Shows the missing translations in the browser",
+    "keywords": ["laravel"],
+    "homepage": "https://github.com/mindtwo/missing-translations",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "mindtwo GmbH",
+            "email": "info@mindtwo.de",
+            "homepage": "https://www.mindtwo.de",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "~7.1",
+        "ext-json": "*",
+        "laravel/framework": "6.*|^7.0|^8.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^6.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "mindtwo\\LaravelMissingTranslations\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "mindtwo\\LaravelMissingTranslations\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "check-style": "phpcs src tests",
+        "fix-style": "phpcbf src tests"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
