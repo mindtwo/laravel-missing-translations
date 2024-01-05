@@ -1,6 +1,5 @@
 {
-    "name": "mindtwo/missing-translations",
-    "type": "library",
+    "name": "mindtwo/laravel-missing-translations",
     "description": "Shows the missing translations in the browser",
     "keywords": ["laravel"],
     "homepage": "https://github.com/mindtwo/missing-translations",
@@ -14,13 +13,18 @@
         }
     ],
     "require": {
-        "php": "^7.0|^8.0",
-        "ext-json": "*",
-        "laravel/framework": "^7.4|^8.0|^9.0"
+        "php": "^8.2|^8.3",
+        "laravel/framework": "^10.0"
     },
     "require-dev": {
-        "orchestra/testbench": "~7.2"
+        "larastan/larastan": "^2.7",
+        "laravel/pint": "^1.13",
+        "orchestra/testbench": "^7.0|^8.17",
+        "pestphp/pest": "^2.28",
+        "phpstan/extension-installer": "^1.3.1"
     },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "autoload": {
         "psr-4": {
             "mindtwo\\LaravelMissingTranslations\\": "src"
@@ -28,20 +32,26 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "mindtwo\\LaravelMissingTranslations\\": "tests"
+            "mindtwo\\LaravelMissingTranslations\\Tests\\\\": "tests"
         }
     },
     "scripts": {
-        "test": "phpunit",
-        "check-style": "phpcs src tests",
-        "fix-style": "phpcbf src tests"
+        "analyse": "vendor/bin/phpstan analyse",
+        "baseline": "vendor/bin/phpstan analyse --generate-baseline",
+        "test": "vendor/bin/pest"
     },
     "extra": {
-        "branch-alias": {
-            "dev-master": "1.0-dev"
+        "laravel": {
+            "providers": [
+                "mindtwo\\LaravelMissingTranslations\\MissingTranslationsServiceProvider"
+            ]
         }
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
+        }
     }
 }
