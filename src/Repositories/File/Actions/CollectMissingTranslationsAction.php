@@ -1,6 +1,6 @@
 <?php
 
-namespace mindtwo\LaravelMissingTranslations\Actions;
+namespace mindtwo\LaravelMissingTranslations\Repositories\File\Actions;
 
 use Illuminate\Support\Arr;
 

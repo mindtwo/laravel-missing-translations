@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use mindtwo\LaravelMissingTranslations\Models\MissingTranslation;
 use mindtwo\LaravelMissingTranslations\Commands;
+use mindtwo\LaravelMissingTranslations\Services\MissingTranslations;
 use Throwable;
 
 class MissingTranslationsServiceProvider extends ServiceProvider
@@ -26,23 +27,29 @@ class MissingTranslationsServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-
-        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
-
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'missing-translations');
+        // Load and publish resources
+        $this->load();
+        $this->publish();
 
         $this->commands([
             Commands\CollectMissingTranslationsCommand::class,
         ]);
 
-        $this->publishes([
-            __DIR__.'/../config/missing-translations.php' => config_path('missing-translations.php'),
-            __DIR__.'/../resources/views' => resource_path('views/vendor/missing-translations'),
-        ]);
+        $this->app->singleton(MissingTranslations::class, function () {
+            return new MissingTranslations(
+                locales: config('missing-translations.locales'),
+                mainLocale: config('missing-translations.main_locale'),
+                repositories: config('missing-translations.repositories'),
+            );
+        });
 
         if (config('missing-translations.log_missing_keys')) {
             Lang::handleMissingKeysUsing(function (string $key, array $replacements, string $locale) {
+
+                if (config('missing-translations.log_paused')) {
+                    return $key;
+                }
+
                 try {
                     MissingTranslation::firstOrCreate([
                         'hash' => md5($key),
@@ -57,5 +64,23 @@ class MissingTranslationsServiceProvider extends ServiceProvider
                 return $key;
             });
         }
+    }
+
+
+    private function load(): void
+    {
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+
+        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'missing-translations');
+    }
+
+    private function publish(): void
+    {
+        $this->publishes([
+            __DIR__.'/../config/missing-translations.php' => config_path('missing-translations.php'),
+            __DIR__.'/../resources/views' => resource_path('views/vendor/missing-translations'),
+        ]);
     }
 }

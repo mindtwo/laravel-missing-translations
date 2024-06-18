@@ -24,4 +24,15 @@ return [
          */
         'prefix' => 'missing-translations',
     ],
+
+    'repository' => 'file',
+
+    'repositories' => [
+        /*
+         * Repositories used by the package to retrieve the missing translations.
+         */
+        'file' => \mindtwo\LaravelMissingTranslations\Repositories\File\FileRepository::class,
+
+        'database' => \mindtwo\LaravelMissingTranslations\Repositories\Database\DatabaseRepository::class,
+    ],
 ];

@@ -3,9 +3,8 @@
 namespace mindtwo\LaravelMissingTranslations\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Arr;
-use mindtwo\LaravelMissingTranslations\Actions\CollectMissingTranslationsAction;
 use mindtwo\LaravelMissingTranslations\Models\MissingTranslation;
+use mindtwo\LaravelMissingTranslations\Services\MissingTranslations;
 
 class CollectMissingTranslationsCommand extends Command
 {
@@ -65,7 +64,7 @@ class CollectMissingTranslationsCommand extends Command
                 continue;
             }
 
-            $diff = app(CollectMissingTranslationsAction::class)($locale, $mainLocale);
+            $diff = app(MissingTranslations::class)->repo()->getMissingTranslationsForLocale($locale);
 
             if (empty($diff)) {
                 $this->info("No missing translations found for locale '$locale'.");

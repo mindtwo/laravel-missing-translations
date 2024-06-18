@@ -9,20 +9,30 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Lang;
-use mindtwo\LaravelMissingTranslations\Actions\CollectMissingTranslationsAction;
-use mindtwo\LaravelMissingTranslations\Actions\CollectTranslationsAction;
+use mindtwo\LaravelMissingTranslations\Services\MissingTranslations;
 
 class MissingTranslationsController extends Controller
 {
 
-    public function __construct()
+    public function __construct(
+        protected MissingTranslations $missingTranslations,
+    )
     {
+        // Pause the logging of missing keys
+        config()->set('missing-translations.log_paused', true);
+
         // Set the authorization middleware
         if ($gate = config('missing-translations.authorization.gate')) {
             $gate = is_bool($gate) ? 'viewMissingTranslations' : $gate;
 
             $this->middleware("can:$gate");
         }
+    }
+
+    public function __destruct()
+    {
+        // Unpause the logging of missing keys
+        config()->set('missing-translations.log_paused', false);
     }
 
     /**
@@ -102,23 +112,14 @@ class MissingTranslationsController extends Controller
     protected function getLanguageKeys(Request $request, string $defaultLocale, array $locales): Collection
     {
         $onlyMissing = $request->has('only_missing');
+        $repository = $this->missingTranslations->repo('database');
 
-        if (! $onlyMissing) {
-            return collect(app(CollectTranslationsAction::class)($defaultLocale))->keys();
+        // Get the missing translation keys
+        if ($onlyMissing) {
+            return collect($repository->getMissingTranslationKeys($locales))->flatten();
         }
 
-        $collectAction = app(CollectMissingTranslationsAction::class);
-
-        // Collect all missing translation keys
-        $keys = collect([]);
-        foreach ($locales as $value) {
-            $missing = $collectAction($value, $defaultLocale);
-
-            $keys = $keys->merge(array_keys($missing));
-        }
-
-        // Collect all missing translations
-        return $keys->unique();
+        return collect($repository->getTranslationKeys($defaultLocale));
     }
 
     /**
@@ -144,6 +145,7 @@ class MissingTranslationsController extends Controller
      */
     protected function renderShow(array $table): \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory
     {
+        config()->set('missing-translations.log_missing_keys', true);
         return view('missing-translations::index', [
             'table' => $table,
         ]);
