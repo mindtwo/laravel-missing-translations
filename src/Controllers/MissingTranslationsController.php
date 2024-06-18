@@ -32,7 +32,9 @@ class MissingTranslationsController extends Controller
     public function __destruct()
     {
         // Unpause the logging of missing keys
-        config()->set('missing-translations.log_paused', false);
+        // config([
+        //     'missing-translations.log_paused' => false,
+        // ]);
     }
 
     /**

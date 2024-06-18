@@ -34,7 +34,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "mindtwo\\LaravelMissingTranslations\\Tests\\\\": "tests"
+            "mindtwo\\LaravelMissingTranslations\\Tests\\": "tests"
         }
     },
     "scripts": {

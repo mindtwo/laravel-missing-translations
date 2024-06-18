@@ -71,7 +71,10 @@ class MissingTranslationsServiceProvider extends ServiceProvider
     {
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
-        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+        // Load routes only in allowed environments
+        if ($this->app->environment(config('missing-translations.allowed_environments'))) {
+            $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+        }
 
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'missing-translations');
     }
