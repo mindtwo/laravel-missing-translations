@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use mindtwo\LaravelMissingTranslations\Models\MissingTranslation;
+use mindtwo\LaravelMissingTranslations\Commands;
 use Throwable;
 
 class MissingTranslationsServiceProvider extends ServiceProvider
@@ -25,12 +26,15 @@ class MissingTranslationsServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
 
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'missing-translations');
+
+        $this->commands([
+            Commands\CollectMissingTranslationsCommand::class,
+        ]);
 
         $this->publishes([
             __DIR__.'/../config/missing-translations.php' => config_path('missing-translations.php'),

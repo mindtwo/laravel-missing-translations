@@ -4,10 +4,13 @@ namespace mindtwo\LaravelMissingTranslations\Controllers;
 
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Lang;
+use mindtwo\LaravelMissingTranslations\Actions\CollectMissingTranslationsAction;
+use mindtwo\LaravelMissingTranslations\Actions\CollectTranslationsAction;
 
 class MissingTranslationsController extends Controller
 {
@@ -16,111 +19,122 @@ class MissingTranslationsController extends Controller
      *
      * @return View|Factory
      */
-    public function show()
+    public function show(Request $request)
     {
         // Set default and available locales
         $locales_default = config('missing-translations.main_locale');
-        $locales_available = config('missing-translations.locales');
+        $locales_available = $this->getLocales($request);
 
-        // Check all project translation files
-        $lang_filenames_without_extension = $this->getLangFilenamesWithoutExtension($locales_available);
-
-        // Set default translations
-        $default = $this->getDefaultLanguageTranslations($lang_filenames_without_extension, $locales_default);
-        $default_without_values = $this->cleanupValuesFromArray($default->toArray());
+        // Collect all missing translations
+        $checkedLanguageKeys = $this->getLanguageKeys($request, $locales_default, $locales_available);
 
         // Create translations and render view
         return $this->renderShow(
-            $this->getTranslations(
+            $this->getTranslationTable(
                 $locales_available,
-                $lang_filenames_without_extension,
-                $default_without_values,
                 $locales_default,
-                $default
+                $checkedLanguageKeys,
             )
         );
     }
 
     /**
-     * Clear array recursively with an empty string
+     * @return mixed
      */
-    protected function cleanupValuesFromArray($array): Collection
+    protected function getTranslationTable(array $locales, string $defaultLocale, Collection $languageKeys)
     {
-        return collect($array)->map(function ($value) {
-            if (is_array($value)) {
-                return $this->cleanupValuesFromArray($value);
-            }
+        // Add the default locale to the list of available locales
+        $avaiableLocales = [
+            $defaultLocale,
+            ...$locales,
+        ];
 
-            return '';
+        // Create the table rows
+        $rows = $languageKeys
+                    ->transform(function ($translationKey) use ($avaiableLocales) {
+                        $row = [
+                            substr(md5($translationKey), 0, 6),
+                            $translationKey,
+                        ];
+
+                        // Check if the translation key from the default locale is missing in the other locales
+                        foreach ($avaiableLocales as $locale) {
+                            $row[] = Lang::has($translationKey, $locale, false) ? Lang::get($translationKey, [], $locale) : null;
+                        }
+
+                        return $row;
+                    })->reject(function ($value) {
+                        return is_null($value);
+                    });
+
+        return [
+            'header' => [
+                'Hash',
+                'Language File and Key',
+                "Default Language ($defaultLocale)",
+                // Add the other locales as headers
+                ...Arr::flatten(
+                    collect($locales)
+                        ->map(fn ($locale) => ["Language $locale"])
+                        ->toArray()
+                ),
+            ],
+            'rows' => $rows->toArray(),
+        ];
+    }
+
+    /**
+     * Get all language keys
+     *
+     * @return Collection
+     */
+    protected function getLanguageKeys(Request $request, string $defaultLocale, array $locales): Collection
+    {
+        $onlyMissing = $request->has('only_missing');
+
+        if (! $onlyMissing) {
+            return collect(app(CollectTranslationsAction::class)($defaultLocale))->keys();
+        }
+
+        $collectAction = app(CollectMissingTranslationsAction::class);
+
+        // Collect all missing translation keys
+        $keys = collect([]);
+        foreach ($locales as $value) {
+            $missing = $collectAction($value, $defaultLocale);
+
+            $keys = $keys->merge(array_keys($missing));
+        }
+
+        // Collect all missing translations
+        return $keys->unique();
+    }
+
+    /**
+     * Get the locales to collect the missing translations for
+     *
+     * @return array
+     */
+    protected function getLocales(Request $request): array
+    {
+        $avaiableLocales = config('missing-translations.locales');
+
+        if (! $request->has('exclude')) {
+            return $avaiableLocales;
+        }
+
+        return array_filter($avaiableLocales, function ($locale) use ($request) {
+            return ! in_array($locale, $request->get('exclude'));
         });
     }
 
     /**
-     * @return mixed
+     * @return \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory
      */
-    protected function getTranslations($locales_available, $lang_filenames_without_extension, $default_without_values, $locales_default, $default)
-    {
-        return collect($locales_available)->mapWithKeys(function ($locale) {
-            return [$locale => []];
-        })->transform(function ($value, $lang_key) use ($lang_filenames_without_extension, $default_without_values) {
-            $defaultJsLanguageFile = resource_path('lang/'.$lang_key.'.json');
-            if (file_exists($defaultJsLanguageFile)) {
-                $jsTranslations = json_decode(file_get_contents($defaultJsLanguageFile), true);
-            } else {
-                $jsTranslations = false;
-            }
-
-            return $default_without_values->merge(collect(Arr::dot($lang_filenames_without_extension->map(function ($output, $file) use ($lang_key) {
-                if (app('translator')->has($file, $lang_key, false)) {
-                    return trans($file, [], $lang_key);
-                }
-            })->reject(function ($value) {
-                return is_null($value);
-            })->when(($jsTranslations), function ($collection) use ($jsTranslations) {
-                return $collection->merge(['js' => $jsTranslations]);
-            })->toArray())));
-        })->put($locales_default, $default);
-    }
-
-    protected function getDefaultLanguageTranslations($lang_filenames_without_extension, $locales_default): Collection
-    {
-        $defaultJsLanguageFile = resource_path('lang/'.$locales_default.'.json');
-        if (file_exists($defaultJsLanguageFile)) {
-            $jsTranslations = json_decode(file_get_contents($defaultJsLanguageFile), true);
-        } else {
-            $jsTranslations = false;
-        }
-
-        return collect(Arr::dot($lang_filenames_without_extension->map(function ($output, $file) use ($locales_default) {
-            return trans($file, [], $locales_default);
-        })->when($jsTranslations ?? false, function ($collection) use ($jsTranslations) {
-            return $collection->merge(['js' => $jsTranslations]);
-        })->toArray()));
-    }
-
-    /**
-     * @return mixed
-     */
-    protected function getLangFilenamesWithoutExtension($locales_available)
-    {
-        return collect($locales_available)->map(function ($locale) {
-            $folder = App::langPath().'/'.$locale;
-
-            return glob("{$folder}/*.php");
-        })->flatten()->map(function ($full_path) {
-            return str_replace('.php', '', basename($full_path));
-        })->unique()->mapWithKeys(function ($filename_without_extension) {
-            return [$filename_without_extension => []];
-        })->sortKeys();
-    }
-
-    /**
-     * @return View|Factory
-     */
-    protected function renderShow($translations): \Illuminate\View\View
+    protected function renderShow(array $table): \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory
     {
         return view('missing-translations::index', [
-            'translations' => $translations,
+            'table' => $table,
         ]);
     }
 }
