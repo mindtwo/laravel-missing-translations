@@ -14,6 +14,17 @@ use mindtwo\LaravelMissingTranslations\Actions\CollectTranslationsAction;
 
 class MissingTranslationsController extends Controller
 {
+
+    public function __construct()
+    {
+        // Set the authorization middleware
+        if ($gate = config('missing-translations.authorization.gate')) {
+            $gate = is_bool($gate) ? 'viewMissingTranslations' : $gate;
+
+            $this->middleware("can:$gate");
+        }
+    }
+
     /**
      * Show missing translations
      *
