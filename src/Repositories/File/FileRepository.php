@@ -110,7 +110,7 @@ class FileRepository implements MissingTranslationRepository
     /**
      * Get the translation keys for the specified locale.
      */
-    public function getTranslationKeysForLocale(string $locale): array
+    protected function getTranslationKeysForLocale(string $locale): array
     {
         return collect(($this->collectTranslationsAction)($locale))->keys()->toArray();
     }

@@ -134,7 +134,7 @@ test('retrieve all translation keys for a specific locale', function () {
     $missingTranslationsService = app()->make(MissingTranslations::class);
 
     $repo = $missingTranslationsService->repository('file');
-    $translationKeys = $repo->getTranslationKeysForLocale('en');
+    $translationKeys = $repo->getTranslationKeys(['en']);
 
     expect($translationKeys)->toBeArray();
 

@@ -121,15 +121,4 @@ class DatabaseRepository implements MissingTranslationRepository
         // Does not support default translation keys
         return app(MissingTranslations::class)->repository('file')->getTranslationKeys($locales);
     }
-
-    /**
-     * Get the translation keys for the specified locale.
-     *
-     * @return array - array of translation keys
-     */
-    public function getTranslationKeysForLocale(string $locale): array
-    {
-        // Does not support default translation keys
-        return app(MissingTranslations::class)->repository('file')->getTranslationKeysForLocale($locale);
-    }
 }

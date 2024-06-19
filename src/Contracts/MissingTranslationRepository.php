@@ -48,11 +48,4 @@ interface MissingTranslationRepository
      * @return array - array of translation keys for all locales
      */
     public function getTranslationKeys(array $locale): array;
-
-    /**
-     * Get the translation keys for the specified locale.
-     *
-     * @return array - array of translation keys
-     */
-    public function getTranslationKeysForLocale(string $locale): array;
 }
