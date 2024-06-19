@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('missing_translations')) {
+            return;
+        }
+
         Schema::create('missing_translations', function (Blueprint $table) {
             $table->id();
             $table->string('hash')->unique();

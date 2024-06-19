@@ -4,6 +4,13 @@ namespace mindtwo\LaravelMissingTranslations\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class MissingTranslation
+ *
+ * @property string $hash
+ * @property string $string
+ * @property string $locale
+ */
 class MissingTranslation extends Model
 {
     /**
