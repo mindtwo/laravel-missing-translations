@@ -103,7 +103,16 @@ class MissingTranslationsController extends Controller
     protected function getLanguageKeys(Request $request, string $defaultLocale, array $locales): Collection
     {
         $onlyMissing = $request->has('only_missing');
-        $repository = $this->missingTranslations->repo();
+
+        // Get the repository name from request (hidden parameter)
+        $repoName = $request->get('repo', 'file');
+        if (! in_array($repoName, array_keys(config('missing-translations.repositories')))) {
+            abort(404, 'Repository not found');
+        }
+
+        $repository = $this->missingTranslations->repo(
+            $repoName,
+        );
 
         // Get the missing translation keys
         if ($onlyMissing) {
