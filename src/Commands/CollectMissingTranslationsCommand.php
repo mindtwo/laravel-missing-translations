@@ -62,7 +62,7 @@ class CollectMissingTranslationsCommand extends Command
                 continue;
             }
 
-            $diff = app(MissingTranslations::class)->repo()->getMissingTranslationsForLocale($locale);
+            $diff = app(MissingTranslations::class)->repository()->getMissingTranslationsForLocale($locale);
 
             if (empty($diff)) {
                 $this->info("No missing translations found for locale '$locale'.");

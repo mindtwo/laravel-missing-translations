@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Lang;
+use mindtwo\LaravelMissingTranslations\Contracts\MissingTranslationRepository;
 use mindtwo\LaravelMissingTranslations\Services\MissingTranslations;
 
 class MissingTranslationsController extends Controller
@@ -63,9 +63,11 @@ class MissingTranslationsController extends Controller
             ...$locales,
         ];
 
+        $repository = $this->repository();
+
         // Create the table rows
         $rows = $languageKeys
-            ->transform(function ($translationKey) use ($avaiableLocales) {
+            ->transform(function ($translationKey) use ($avaiableLocales, $repository) {
                 $row = [
                     substr(md5($translationKey), 0, 6),
                     $translationKey,
@@ -73,7 +75,7 @@ class MissingTranslationsController extends Controller
 
                 // Check if the translation key from the default locale is missing in the other locales
                 foreach ($avaiableLocales as $locale) {
-                    $row[] = Lang::has($translationKey, $locale, false) ? Lang::get($translationKey, [], $locale) : null;
+                    $row[] = $repository->has($translationKey, $locale) ? $repository->get($translationKey, $locale) : null;
                 }
 
                 return $row;
@@ -105,21 +107,14 @@ class MissingTranslationsController extends Controller
         $onlyMissing = $request->has('only_missing');
 
         // Get the repository name from request (hidden parameter)
-        $repoName = $request->get('repo', config('missing-translations.repositories.default', 'file'));
-        if (! in_array($repoName, array_keys(config('missing-translations.repositories.sources')))) {
-            abort(404, 'Repository not found');
-        }
-
-        $repository = $this->missingTranslations->repo(
-            $repoName,
-        );
+        $repository = $this->repository();
 
         // Get the missing translation keys
         if ($onlyMissing) {
             return collect($repository->getMissingTranslationKeys($locales))->flatten();
         }
 
-        return collect($repository->getTranslationKeys($defaultLocale));
+        return collect($repository->getTranslationKeys($locales));
     }
 
     /**
@@ -147,5 +142,17 @@ class MissingTranslationsController extends Controller
             'locales' => $localesAvaible,
             'excluded' => request()->get('exclude', []),
         ]);
+    }
+
+    private function repository(): MissingTranslationRepository
+    {
+        $repoName = request()->get('repo', config('missing-translations.repositories.default', 'file'));
+        if (! in_array($repoName, array_keys(config('missing-translations.repositories.sources')))) {
+            abort(404, 'Repository not found');
+        }
+
+        return $this->missingTranslations->repository(
+            $repoName,
+        );
     }
 }

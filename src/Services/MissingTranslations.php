@@ -12,7 +12,7 @@ class MissingTranslations
         protected array $repositorySources,
     ) {}
 
-    public function repo(?string $name = null): MissingTranslationRepository
+    public function repository(?string $name = null): MissingTranslationRepository
     {
         $name = $name ?? config('missing-translations.repositories.default');
 

@@ -2,6 +2,7 @@
 
 namespace mindtwo\LaravelMissingTranslations\Repositories\Database;
 
+use Illuminate\Support\Facades\Lang;
 use mindtwo\LaravelMissingTranslations\Contracts\MissingTranslationRepository;
 use mindtwo\LaravelMissingTranslations\Models\MissingTranslation;
 use mindtwo\LaravelMissingTranslations\Services\MissingTranslations;
@@ -9,6 +10,38 @@ use mindtwo\LaravelMissingTranslations\Services\MissingTranslations;
 class DatabaseRepository implements MissingTranslationRepository
 {
     public function __construct() {}
+
+    /**
+     * Check if the given key exists.
+     */
+    public function has(string $key, ?string $locale = null): bool
+    {
+        $locale = $locale ?? Lang::getLocale();
+
+        return Lang::has($key, $locale, false);
+    }
+
+    /**
+     * Get the translation for the given key.
+     */
+    public function get(string $key, ?string $locale = null): ?string
+    {
+        $locale = $locale ?? Lang::getLocale();
+
+        if (! $this->has($key, $locale)) {
+            return null;
+        }
+
+        // Get the translation for the given key
+        $value = Lang::get($key, [], $locale);
+
+        // Return null if the value is an array
+        if (is_array($value)) {
+            return null;
+        }
+
+        return $value;
+    }
 
     /**
      * Get missing translations for the specified locales.
@@ -79,13 +112,24 @@ class DatabaseRepository implements MissingTranslationRepository
     }
 
     /**
+     * Get the translation keys for all locales.
+     *
+     * @return array - array of translation keys
+     */
+    public function getTranslationKeys(array $locales): array
+    {
+        // Does not support default translation keys
+        return app(MissingTranslations::class)->repository('file')->getTranslationKeys($locales);
+    }
+
+    /**
      * Get the translation keys for the specified locale.
      *
      * @return array - array of translation keys
      */
-    public function getTranslationKeys(string $locale): array
+    public function getTranslationKeysForLocale(string $locale): array
     {
         // Does not support default translation keys
-        return app(MissingTranslations::class)->repo('file')->getTranslationKeys($locale);
+        return app(MissingTranslations::class)->repository('file')->getTranslationKeysForLocale($locale);
     }
 }

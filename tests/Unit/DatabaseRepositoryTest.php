@@ -40,7 +40,7 @@ beforeEach(function () {
 test('retrieve a database repository instance', function () {
     $missingTranslationsService = app()->make(MissingTranslations::class);
 
-    $repo = $missingTranslationsService->repo('database');
+    $repo = $missingTranslationsService->repository('database');
 
     expect($repo instanceof DatabaseRepository)->toBeTrue();
 });
@@ -48,7 +48,7 @@ test('retrieve a database repository instance', function () {
 test('retrieve all missing translations model grouped by locale', function () {
     $missingTranslationsService = app()->make(MissingTranslations::class);
 
-    $repo = $missingTranslationsService->repo('database');
+    $repo = $missingTranslationsService->repository('database');
 
     $missingTranslations = $repo->getMissingTranslations(['en', 'de']);
 
@@ -69,7 +69,7 @@ test('retrieve all missing translations model grouped by locale', function () {
 test('retrieve all missing translations model for a specific locale', function () {
     $missingTranslationsService = app()->make(MissingTranslations::class);
 
-    $repo = $missingTranslationsService->repo('database');
+    $repo = $missingTranslationsService->repository('database');
 
     $missingTranslations = $repo->getMissingTranslationsForLocale('en');
 
@@ -83,7 +83,7 @@ test('retrieve all missing translations model for a specific locale', function (
 test('retrieve all missing translation keys grouped by locale', function () {
     $missingTranslationsService = app()->make(MissingTranslations::class);
 
-    $repo = $missingTranslationsService->repo('database');
+    $repo = $missingTranslationsService->repository('database');
 
     $missingTranslationKeys = $repo->getMissingTranslationKeys(['en', 'de']);
 
@@ -103,7 +103,7 @@ test('retrieve all missing translation keys grouped by locale', function () {
 test('retrieve all missing translation keys for a specific locale', function () {
     $missingTranslationsService = app()->make(MissingTranslations::class);
 
-    $repo = $missingTranslationsService->repo('database');
+    $repo = $missingTranslationsService->repository('database');
 
     $missingTranslationKeys = $repo->getMissingTranslationKeysForLocale('en');
 
@@ -117,6 +117,6 @@ test('retrieve all missing translation keys for a specific locale', function () 
 test('retrieve all translation keys for a specific locale', function () {
     $missingTranslationsService = app()->make(MissingTranslations::class);
 
-    $repo = $missingTranslationsService->repo('database');
-    $translationKeys = $repo->getTranslationKeys('en');
+    $repo = $missingTranslationsService->repository('database');
+    $translationKeys = $repo->getTranslationKeysForLocale('en');
 })->skip(true, 'We use the file repository for this.');

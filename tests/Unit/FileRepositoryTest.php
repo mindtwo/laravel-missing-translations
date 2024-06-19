@@ -40,7 +40,7 @@ beforeEach(function () {
 test('retrieve a database repository instance', function () {
     $missingTranslationsService = app()->make(MissingTranslations::class);
 
-    $repo = $missingTranslationsService->repo('file');
+    $repo = $missingTranslationsService->repository('file');
 
     expect($repo instanceof FileRepository)->toBeTrue();
 
@@ -67,7 +67,7 @@ test('retrieve a database repository instance', function () {
 test('retrieve all missing translations model grouped by locale', function () {
     $missingTranslationsService = app()->make(MissingTranslations::class);
 
-    $repo = $missingTranslationsService->repo('file');
+    $repo = $missingTranslationsService->repository('file');
 
     $missingTranslations = $repo->getMissingTranslations(['en', 'de']);
 
@@ -87,7 +87,7 @@ test('retrieve all missing translations model grouped by locale', function () {
 test('retrieve all missing translations model for a specific locale', function () {
     $missingTranslationsService = app()->make(MissingTranslations::class);
 
-    $repo = $missingTranslationsService->repo('file');
+    $repo = $missingTranslationsService->repository('file');
 
     $missingTranslations = $repo->getMissingTranslationsForLocale('de');
 
@@ -102,7 +102,7 @@ test('retrieve all missing translations model for a specific locale', function (
 test('retrieve all missing translation keys grouped by locale', function () {
     $missingTranslationsService = app()->make(MissingTranslations::class);
 
-    $repo = $missingTranslationsService->repo('file');
+    $repo = $missingTranslationsService->repository('file');
 
     $missingTranslationKeys = $repo->getMissingTranslationKeys(['en', 'de']);
 
@@ -121,7 +121,7 @@ test('retrieve all missing translation keys grouped by locale', function () {
 test('retrieve all missing translation keys for a specific locale', function () {
     $missingTranslationsService = app()->make(MissingTranslations::class);
 
-    $repo = $missingTranslationsService->repo('file');
+    $repo = $missingTranslationsService->repository('file');
 
     $missingTranslationKeys = $repo->getMissingTranslationKeysForLocale('de');
 
@@ -133,8 +133,8 @@ test('retrieve all missing translation keys for a specific locale', function () 
 test('retrieve all translation keys for a specific locale', function () {
     $missingTranslationsService = app()->make(MissingTranslations::class);
 
-    $repo = $missingTranslationsService->repo('file');
-    $translationKeys = $repo->getTranslationKeys('en');
+    $repo = $missingTranslationsService->repository('file');
+    $translationKeys = $repo->getTranslationKeysForLocale('en');
 
     expect($translationKeys)->toBeArray();
 
