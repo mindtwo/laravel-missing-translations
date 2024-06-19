@@ -8,19 +8,14 @@ use mindtwo\LaravelMissingTranslations\Repositories\File\Actions\CollectTranslat
 
 class FileRepository implements MissingTranslationRepository
 {
-
     public function __construct(
         protected CollectMissingTranslationsAction $collectMissingTranslationsAction,
         protected CollectTranslationsAction $collectTranslationsAction,
-    )
-    {
-
-    }
+    ) {}
 
     /**
      * Get missing translations for the specified locales.
      *
-     * @param array $locales
      * @return array - array of missing translations with key grouped by locale
      */
     public function getMissingTranslations(array $locales): array
@@ -36,20 +31,15 @@ class FileRepository implements MissingTranslationRepository
 
     /**
      * Get missing translations for the specified locale.
-     *
-     * @param string $locale
-     * @return array
      */
     public function getMissingTranslationsForLocale(string $locale): array
     {
-        return collect(($this->collectMissingTranslationsAction)($locale))->keys()->toArray();
+        return collect(($this->collectMissingTranslationsAction)($locale))->toArray();
     }
-
 
     /**
      * Get missing translation keys for the specified locales.
      *
-     * @param array $locales
      * @return array - array of missing translations keys grouped by locale
      */
     public function getMissingTranslationKeys(array $locales): array
@@ -66,7 +56,6 @@ class FileRepository implements MissingTranslationRepository
     /**
      * Get missing translation keys for the specified locale.
      *
-     * @param string $locale
      * @return array - array of missing translations keys
      */
     public function getMissingTranslationKeysForLocale(string $locale): array
@@ -76,9 +65,6 @@ class FileRepository implements MissingTranslationRepository
 
     /**
      * Get the translation keys for the specified locale.
-     *
-     * @param string $locale
-     * @return array
      */
     public function getTranslationKeys(string $locale): array
     {

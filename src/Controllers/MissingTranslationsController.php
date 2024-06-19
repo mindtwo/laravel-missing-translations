@@ -13,11 +13,9 @@ use mindtwo\LaravelMissingTranslations\Services\MissingTranslations;
 
 class MissingTranslationsController extends Controller
 {
-
     public function __construct(
         protected MissingTranslations $missingTranslations,
-    )
-    {
+    ) {
         // Pause the logging of missing keys
         config()->set('missing-translations.log_paused', true);
 
@@ -27,14 +25,6 @@ class MissingTranslationsController extends Controller
 
             $this->middleware("can:$gate");
         }
-    }
-
-    public function __destruct()
-    {
-        // Unpause the logging of missing keys
-        // config([
-        //     'missing-translations.log_paused' => false,
-        // ]);
     }
 
     /**
@@ -74,21 +64,21 @@ class MissingTranslationsController extends Controller
 
         // Create the table rows
         $rows = $languageKeys
-                    ->transform(function ($translationKey) use ($avaiableLocales) {
-                        $row = [
-                            substr(md5($translationKey), 0, 6),
-                            $translationKey,
-                        ];
+            ->transform(function ($translationKey) use ($avaiableLocales) {
+                $row = [
+                    substr(md5($translationKey), 0, 6),
+                    $translationKey,
+                ];
 
-                        // Check if the translation key from the default locale is missing in the other locales
-                        foreach ($avaiableLocales as $locale) {
-                            $row[] = Lang::has($translationKey, $locale, false) ? Lang::get($translationKey, [], $locale) : null;
-                        }
+                // Check if the translation key from the default locale is missing in the other locales
+                foreach ($avaiableLocales as $locale) {
+                    $row[] = Lang::has($translationKey, $locale, false) ? Lang::get($translationKey, [], $locale) : null;
+                }
 
-                        return $row;
-                    })->reject(function ($value) {
-                        return is_null($value);
-                    });
+                return $row;
+            })->reject(function ($value) {
+                return is_null($value);
+            });
 
         return [
             'header' => [
@@ -108,13 +98,11 @@ class MissingTranslationsController extends Controller
 
     /**
      * Get all language keys
-     *
-     * @return Collection
      */
     protected function getLanguageKeys(Request $request, string $defaultLocale, array $locales): Collection
     {
         $onlyMissing = $request->has('only_missing');
-        $repository = $this->missingTranslations->repo('database');
+        $repository = $this->missingTranslations->repo();
 
         // Get the missing translation keys
         if ($onlyMissing) {
@@ -126,8 +114,6 @@ class MissingTranslationsController extends Controller
 
     /**
      * Get the locales to collect the missing translations for
-     *
-     * @return array
      */
     protected function getLocales(Request $request): array
     {
@@ -142,12 +128,10 @@ class MissingTranslationsController extends Controller
         });
     }
 
-    /**
-     * @return \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory
-     */
     protected function renderShow(array $table): \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory
     {
         config()->set('missing-translations.log_missing_keys', true);
+
         return view('missing-translations::index', [
             'table' => $table,
         ]);

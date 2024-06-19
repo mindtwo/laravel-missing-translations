@@ -8,43 +8,51 @@ use mindtwo\LaravelMissingTranslations\Services\MissingTranslations;
 
 class DatabaseRepository implements MissingTranslationRepository
 {
+    public function __construct() {}
 
-    public function __construct()
-    {
-    }
-
-        /**
+    /**
      * Get missing translations for the specified locales.
      *
-     * @param array $locales
      * @return array - array of missing translations with key grouped by locale
      */
     public function getMissingTranslations(array $locales): array
     {
+        // Get all missing translations for the specified locales via the MissingTranslation model
         return MissingTranslation::whereIn('locale', $locales)
-            ->groupBy('locale')
             ->get()
+            ->groupBy('locale')
+            ->mapWithKeys(function ($items, $locale) {
+                return [
+                    $locale => $items->reduce(function ($carry, $item) {
+                        $carry[$item['string']] = '';
+
+                        return $carry;
+                    }, []),
+                ];
+            })
             ->toArray();
     }
-
 
     /**
      * Get missing translations for the specified locale.
      *
-     * @param string $locale
      * @return array - array of missing translations with key
      */
     public function getMissingTranslationsForLocale(string $locale): array
     {
-        return MissingTranslation::where('locale', $locale)
-            ->get()
+        // Get all missing keys for the specified locale via the MissingTranslation model
+        $missingKeys = $this->getMissingTranslationKeysForLocale($locale);
+
+        return collect($missingKeys)
+            ->mapWithKeys(function ($key) {
+                return [$key => ''];
+            })
             ->toArray();
     }
 
     /**
      * Get missing translation keys for the specified locales.
      *
-     * @param array $locales
      * @return array - array of missing translations keys grouped by locale
      */
     public function getMissingTranslationKeys(array $locales): array
@@ -53,6 +61,7 @@ class DatabaseRepository implements MissingTranslationRepository
             ->get()
             ->reduce(function ($carry, $item) {
                 $carry[$item['locale']][] = $item['string'];
+
                 return $carry;
             }, []);
     }
@@ -60,7 +69,6 @@ class DatabaseRepository implements MissingTranslationRepository
     /**
      * Get missing translation keys for the specified locale.
      *
-     * @param string $locale
      * @return array - array of missing translations keys
      */
     public function getMissingTranslationKeysForLocale(string $locale): array
@@ -73,7 +81,6 @@ class DatabaseRepository implements MissingTranslationRepository
     /**
      * Get the translation keys for the specified locale.
      *
-     * @param string $locale
      * @return array - array of translation keys
      */
     public function getTranslationKeys(string $locale): array

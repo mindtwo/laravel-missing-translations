@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use mindtwo\LaravelMissingTranslations\Models\MissingTranslation;
-use mindtwo\LaravelMissingTranslations\Commands;
 use mindtwo\LaravelMissingTranslations\Services\MissingTranslations;
 use Throwable;
 
@@ -45,7 +44,6 @@ class MissingTranslationsServiceProvider extends ServiceProvider
 
         if (config('missing-translations.log_missing_keys')) {
             Lang::handleMissingKeysUsing(function (string $key, array $replacements, string $locale) {
-
                 if (config('missing-translations.log_paused')) {
                     return $key;
                 }
@@ -65,7 +63,6 @@ class MissingTranslationsServiceProvider extends ServiceProvider
             });
         }
     }
-
 
     private function load(): void
     {

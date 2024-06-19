@@ -3,11 +3,13 @@
 namespace mindtwo\LaravelMissingTranslations\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Env;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
 {
+    use RefreshDatabase;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -31,7 +33,7 @@ class TestCase extends Orchestra
     public function getEnvironmentSetUp($app)
     {
         config()->set('missing-translations.allowed_environments', ['testing']);
-
+        config()->set('missing-translations.log_paused', true);
         /*
         $migration = include __DIR__.'/../database/migrations/create_laravel-translatable_table.php.stub';
         $migration->up();

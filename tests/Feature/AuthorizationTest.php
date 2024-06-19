@@ -5,13 +5,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
 use mindtwo\LaravelMissingTranslations\Tests\TestCase;
 
-uses(TestCase::class, RefreshDatabase::class);
+uses(TestCase::class);
 
 beforeEach(function () {
     // Run the translatable table migration
     foreach ([
         include dirname(__DIR__).'/../database/migrations/2024_01_05_163320_create_missing_translations_table.php',
-        include dirname(__DIR__).'/migrations/create_users_table.php',
+        include dirname(__DIR__).'/database/migrations/create_users_table.php',
     ] as $migration) {
         $migration->up();
     }

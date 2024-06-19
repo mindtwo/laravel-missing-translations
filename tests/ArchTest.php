@@ -1,5 +1,5 @@
 <?php
 
 arch('globals')
-    ->expect(['dd'. 'dump', 'ray'])
+    ->expect(['dd', 'dump', 'ray'])
     ->not->toBeUsed();

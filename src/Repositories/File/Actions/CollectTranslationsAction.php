@@ -6,11 +6,9 @@ use Illuminate\Support\Arr;
 
 class CollectTranslationsAction
 {
-
     public function __invoke(
         string $locale,
-    ): array
-    {
+    ): array {
         // Get the language files for the main locale
         $langFiles = $this->getLangFiles($locale);
 
@@ -27,10 +25,6 @@ class CollectTranslationsAction
 
     /**
      * Get the content of the specified file.
-     *
-     * @param string $file
-     *
-     * @return array
      */
     protected function getFileContent(string $file): array
     {
@@ -41,7 +35,7 @@ class CollectTranslationsAction
         // Get the filename
         $filename = basename($file);
         if (str_ends_with($filename, '.php')) {
-            return Arr::dot(require $file, str_replace('.php', '', $filename) . '.');
+            return Arr::dot(require $file, str_replace('.php', '', $filename).'.');
         }
 
         return json_decode(file_get_contents($file), true);
@@ -49,22 +43,18 @@ class CollectTranslationsAction
 
     /**
      * Get the language files for the specified locale.
-     *
-     * @param string $locale
-     *
-     * @return array
      */
     protected function getLangFiles(string $locale): array
     {
         $files = [];
 
-        $basePath = base_path("lang/$locale");
+        $basePath = lang_path("$locale");
         if (is_dir($basePath)) {
             $files = scandir($basePath);
         }
 
-        if (file_exists(base_path("lang/$locale.json"))) {
-            $files[] = base_path("lang/$locale.json");
+        if (file_exists(lang_path("$locale.json"))) {
+            $files[] = lang_path("$locale.json");
         }
 
         return collect($files)
@@ -72,11 +62,11 @@ class CollectTranslationsAction
                 return ! in_array($file, ['.', '..']);
             })
             ->mapWithKeys(function ($file) use ($basePath) {
-                if (str_starts_with($file, base_path())) {
-                    return [str_replace(base_path('lang/'), '', $file) => $file];
+                if (str_starts_with($file, lang_path())) {
+                    return [str_replace(lang_path(), '', $file) => $file];
                 }
 
-                return [$file => $basePath . '/' . $file];
+                return [$file => $basePath.'/'.$file];
             })
             ->toArray();
     }
