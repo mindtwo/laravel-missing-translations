@@ -17,7 +17,7 @@ class CollectMissingTranslationsCommand extends Command
         {--L|locales=* : The locales to collect the missing translations for}
         {--dry-run : Perform a dry run without collecting any missing translations}
     ';
-        // {--F|force : Force the collection without asking for confirmation}
+    // {--F|force : Force the collection without asking for confirmation}
 
     /**
      * The console command description.
@@ -48,8 +48,6 @@ class CollectMissingTranslationsCommand extends Command
 
     /**
      * Collect the missing translations for the specified locales.
-     *
-     * @param array $locales
      */
     protected function collectLangFileDiff(array $locales): void
     {
@@ -57,7 +55,7 @@ class CollectMissingTranslationsCommand extends Command
         $mainLocale = config('missing-translations.main_locale');
 
         foreach ($locales as $locale) {
-            $locale = str_replace('=','',$locale);
+            $locale = str_replace('=', '', $locale);
 
             // Skip the main locale
             if ($locale === $mainLocale) {
@@ -72,7 +70,7 @@ class CollectMissingTranslationsCommand extends Command
                 continue;
             }
 
-            $this->info("Found " . count($diff) . " missing translations for locale '$locale'.");
+            $this->info('Found '.count($diff)." missing translations for locale '$locale'.");
 
             if ($this->option('dry-run')) {
                 continue;
@@ -90,6 +88,4 @@ class CollectMissingTranslationsCommand extends Command
         }
 
     }
-
-
 }

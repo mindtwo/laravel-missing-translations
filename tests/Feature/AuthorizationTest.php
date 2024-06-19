@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Foundation\Auth\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
 use mindtwo\LaravelMissingTranslations\Tests\TestCase;
 

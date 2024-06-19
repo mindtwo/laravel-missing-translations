@@ -14,14 +14,13 @@ beforeEach(function () {
     }
 });
 
-
 test('registration of missing-translations route', function () {
     $this->updateConfig([
         'missing-translations.allowed_environments' => ['testing'],
     ]);
 
     $this->get('/missing-translations')
-    ->assertStatus(200);
+        ->assertStatus(200);
 });
 
 test('route is only available in allowed environments', function () {

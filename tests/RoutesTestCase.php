@@ -3,7 +3,6 @@
 namespace mindtwo\LaravelMissingTranslations\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Env;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 class RoutesTestCase extends Orchestra

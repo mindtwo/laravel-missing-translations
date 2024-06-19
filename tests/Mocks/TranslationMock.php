@@ -1,4 +1,5 @@
 <?php
+
 namespace mindtwo\LaravelMissingTranslations\Tests\Mocks;
 
 use Illuminate\Contracts\Translation\Translator;
@@ -6,16 +7,13 @@ use Illuminate\Support\Arr;
 
 class TranslationMock implements Translator
 {
-
     private string $locale = 'en';
 
     protected $missingTranslationKeyCallback;
 
     public function __construct(
         protected array $translations = []
-    )
-    {
-    }
+    ) {}
 
     public function trans($key, array $replace = [], $locale = null)
     {
@@ -73,7 +71,6 @@ class TranslationMock implements Translator
     /**
      * Register a callback that is responsible for handling missing translation keys.
      *
-     * @param  callable|null  $callback
      * @return static
      */
     public function handleMissingKeysUsing(?callable $callback)
