@@ -56,7 +56,10 @@ class CollectMissingTranslationsAction
         $array1 = Arr::dot($array1, $file);
         $array2 = Arr::dot($array2, $file);
 
-        return array_diff_key($array1, $array2);
+        return array_diff_key(
+            $array1 + $array2, // merge the arrays to get all keys
+            array_intersect_key($array1, $array2) // get the keys that are in both arrays
+        );
     }
 
     /**
