@@ -15,8 +15,8 @@ jobs:
         stability: [prefer-lowest, prefer-stable]
         include:
           - laravel: 11.*
-            testbench: 8.*
-            carbon: ^2.67
+            testbench: 9.*
+            # carbon: ^2.67
 
     name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.os }}
 
