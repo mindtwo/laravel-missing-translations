@@ -36,18 +36,19 @@ class MissingTranslationsController extends Controller
     {
         // Set default and available locales
         $locales_default = config('missing-translations.main_locale');
-        $locales_available = $this->getLocales($request);
+        $localesAvaible = $this->getLocales($request);
 
         // Collect all missing translations
-        $checkedLanguageKeys = $this->getLanguageKeys($request, $locales_default, $locales_available);
+        $checkedLanguageKeys = $this->getLanguageKeys($request, $locales_default, $localesAvaible);
 
         // Create translations and render view
         return $this->renderShow(
             $this->getTranslationTable(
-                $locales_available,
+                $localesAvaible,
                 $locales_default,
                 $checkedLanguageKeys,
-            )
+            ),
+            $localesAvaible,
         );
     }
 
@@ -128,12 +129,14 @@ class MissingTranslationsController extends Controller
         });
     }
 
-    protected function renderShow(array $table): \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory
+    protected function renderShow(array $table, array $localesAvaible): \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory
     {
         config()->set('missing-translations.log_missing_keys', true);
 
         return view('missing-translations::index', [
             'table' => $table,
+            'locales' => $localesAvaible,
+            'excluded' => request()->get('exclude', []),
         ]);
     }
 }
