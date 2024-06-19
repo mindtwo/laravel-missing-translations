@@ -105,8 +105,8 @@ class MissingTranslationsController extends Controller
         $onlyMissing = $request->has('only_missing');
 
         // Get the repository name from request (hidden parameter)
-        $repoName = $request->get('repo', 'file');
-        if (! in_array($repoName, array_keys(config('missing-translations.repositories')))) {
+        $repoName = $request->get('repo', config('missing-translations.repositories.default', 'file'));
+        if (! in_array($repoName, array_keys(config('missing-translations.repositories.sources')))) {
             abort(404, 'Repository not found');
         }
 

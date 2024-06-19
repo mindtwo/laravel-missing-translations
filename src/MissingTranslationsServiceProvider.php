@@ -38,7 +38,7 @@ class MissingTranslationsServiceProvider extends ServiceProvider
             return new MissingTranslations(
                 locales: config('missing-translations.locales'),
                 mainLocale: config('missing-translations.main_locale'),
-                repositories: config('missing-translations.repositories'),
+                repositorySources: config('missing-translations.repositories.sources'),
             );
         });
 

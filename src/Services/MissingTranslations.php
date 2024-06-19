@@ -9,17 +9,17 @@ class MissingTranslations
     public function __construct(
         protected array $locales,
         protected string $mainLocale,
-        protected array $repositories,
+        protected array $repositorySources,
     ) {}
 
     public function repo(?string $name = null): MissingTranslationRepository
     {
-        $name = $name ?? config('missing-translations.repository');
+        $name = $name ?? config('missing-translations.repositories.default');
 
-        if (! array_key_exists($name, $this->repositories)) {
+        if (! array_key_exists($name, $this->repositorySources)) {
             throw new \InvalidArgumentException("Missing translation repository [$name] not found.");
         }
 
-        return app($this->repositories[$name]);
+        return app($this->repositorySources[$name]);
     }
 }
