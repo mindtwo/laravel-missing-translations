@@ -1,8 +1,5 @@
-includes:
-    - phpstan-baseline.neon
-
 parameters:
-    level: 5
+    level: 8
     paths:
         - src
         - config
@@ -10,4 +7,5 @@ parameters:
     tmpDir: build/phpstan
     checkOctaneCompatibility: true
     checkModelProperties: true
-    checkMissingIterableValueType: false
+    viewDirectories:
+        - resources/views

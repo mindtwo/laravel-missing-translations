@@ -9,10 +9,8 @@ use mindtwo\LaravelMissingTranslations\Services\MissingTranslations;
 
 class DatabaseRepository implements MissingTranslationRepository
 {
-    public function __construct() {}
-
     /**
-     * Check if the given key exists.
+     * Determine if a translation exists for the given key.
      */
     public function has(string $key, ?string $locale = null): bool
     {
@@ -22,7 +20,7 @@ class DatabaseRepository implements MissingTranslationRepository
     }
 
     /**
-     * Get the translation for the given key.
+     * Retrieve the translation for the given key.
      */
     public function get(string $key, ?string $locale = null): ?string
     {
@@ -32,10 +30,8 @@ class DatabaseRepository implements MissingTranslationRepository
             return null;
         }
 
-        // Get the translation for the given key
         $value = Lang::get($key, [], $locale);
 
-        // Return null if the value is an array
         if (is_array($value)) {
             return null;
         }
@@ -44,81 +40,77 @@ class DatabaseRepository implements MissingTranslationRepository
     }
 
     /**
-     * Get missing translations for the specified locales.
+     * Get the missing translations grouped by the given locales.
      *
-     * @return array - array of missing translations with key grouped by locale
+     * @param  array<int, string>  $locales
+     * @return array<string, array<string, string>>
      */
     public function getMissingTranslations(array $locales): array
     {
-        // Get all missing translations for the specified locales via the MissingTranslation model
         return MissingTranslation::whereIn('locale', $locales)
             ->get()
             ->groupBy('locale')
-            ->mapWithKeys(function ($items, $locale) {
-                return [
-                    $locale => $items->reduce(function ($carry, $item) {
-                        $carry[$item['string']] = '';
+            ->mapWithKeys(fn ($items, $locale) => [
+                $locale => $items->reduce(function (array $carry, MissingTranslation $item) {
+                    $carry[$item->string] = '';
 
-                        return $carry;
-                    }, []),
-                ];
-            })
-            ->toArray();
+                    return $carry;
+                }, []),
+            ])
+            ->all();
     }
 
     /**
-     * Get missing translations for the specified locale.
+     * Get the missing translations for the given locale.
      *
-     * @return array - array of missing translations with key
+     * @return array<string, string>
      */
     public function getMissingTranslationsForLocale(string $locale): array
     {
-        // Get all missing keys for the specified locale via the MissingTranslation model
-        $missingKeys = $this->getMissingTranslationKeysForLocale($locale);
-
-        return collect($missingKeys)
-            ->mapWithKeys(function ($key) {
-                return [$key => ''];
-            })
-            ->toArray();
+        return collect($this->getMissingTranslationKeysForLocale($locale))
+            ->mapWithKeys(fn (string $key) => [$key => ''])
+            ->all();
     }
 
     /**
-     * Get missing translation keys for the specified locales.
+     * Get the missing translation keys grouped by the given locales.
      *
-     * @return array - array of missing translations keys grouped by locale
+     * @param  array<int, string>  $locales
+     * @return array<string, array<int, string>>
      */
     public function getMissingTranslationKeys(array $locales): array
     {
         return MissingTranslation::whereIn('locale', $locales)
             ->get()
-            ->reduce(function ($carry, $item) {
-                $carry[$item['locale']][] = $item['string'];
+            ->reduce(function (array $carry, MissingTranslation $item) {
+                $carry[$item->locale][] = $item->string;
 
                 return $carry;
             }, []);
     }
 
     /**
-     * Get missing translation keys for the specified locale.
+     * Get the missing translation keys for the given locale.
      *
-     * @return array - array of missing translations keys
+     * @return array<int, string>
      */
     public function getMissingTranslationKeysForLocale(string $locale): array
     {
         return MissingTranslation::where('locale', $locale)
             ->pluck('string')
-            ->toArray();
+            ->all();
     }
 
     /**
-     * Get the translation keys for all locales.
+     * Get every translation key defined across the given locales.
      *
-     * @return array - array of translation keys
+     * Delegates to the file repository since the database only tracks misses.
+     *
+     * @param  array<int, string>  $locales
+     * @return array<int, string>
      */
     public function getTranslationKeys(array $locales): array
     {
-        // Does not support default translation keys
         return app(MissingTranslations::class)->repository('file')->getTranslationKeys($locales);
     }
 }

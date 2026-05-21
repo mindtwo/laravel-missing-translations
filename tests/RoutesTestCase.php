@@ -3,6 +3,7 @@
 namespace mindtwo\LaravelMissingTranslations\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use mindtwo\LaravelMissingTranslations\MissingTranslationsServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 class RoutesTestCase extends Orchestra
@@ -33,7 +34,7 @@ class RoutesTestCase extends Orchestra
         foreach ($values as $key => $value) {
             $this->app['config']->set($key, $value);
         }
-        $this->app->register(\mindtwo\LaravelMissingTranslations\MissingTranslationsServiceProvider::class);
+        $this->app->register(MissingTranslationsServiceProvider::class);
     }
 
     public function getEnvironmentSetUp($app)

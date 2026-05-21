@@ -1,5 +1,8 @@
 <?php
 
+use mindtwo\LaravelMissingTranslations\Repositories\Database\DatabaseRepository;
+use mindtwo\LaravelMissingTranslations\Repositories\File\FileRepository;
+
 return [
     'allowed_environments' => ['local', 'staging'],
     'main_locale' => 'en',
@@ -36,9 +39,9 @@ return [
          * Source Classes used by the package to retrieve the missing translations.
          */
         'sources' => [
-            'file' => \mindtwo\LaravelMissingTranslations\Repositories\File\FileRepository::class,
+            'file' => FileRepository::class,
 
-            'database' => \mindtwo\LaravelMissingTranslations\Repositories\Database\DatabaseRepository::class,
+            'database' => DatabaseRepository::class,
         ],
 
     ],

@@ -4,6 +4,7 @@ namespace mindtwo\LaravelMissingTranslations\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use mindtwo\LaravelMissingTranslations\MissingTranslationsServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
@@ -26,7 +27,7 @@ class TestCase extends Orchestra
     protected function getPackageProviders($app)
     {
         return [
-            \mindtwo\LaravelMissingTranslations\MissingTranslationsServiceProvider::class,
+            MissingTranslationsServiceProvider::class,
         ];
     }
 

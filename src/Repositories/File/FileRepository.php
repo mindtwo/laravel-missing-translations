@@ -9,13 +9,16 @@ use mindtwo\LaravelMissingTranslations\Repositories\File\Actions\CollectTranslat
 
 class FileRepository implements MissingTranslationRepository
 {
+    /**
+     * Create a new file repository instance.
+     */
     public function __construct(
         protected CollectMissingTranslationsAction $collectMissingTranslationsAction,
         protected CollectTranslationsAction $collectTranslationsAction,
     ) {}
 
     /**
-     * Check if the given key exists.
+     * Determine if a translation exists for the given key.
      */
     public function has(string $key, ?string $locale = null): bool
     {
@@ -25,7 +28,7 @@ class FileRepository implements MissingTranslationRepository
     }
 
     /**
-     * Get the translation for the given key.
+     * Retrieve the translation for the given key.
      */
     public function get(string $key, ?string $locale = null): ?string
     {
@@ -35,10 +38,8 @@ class FileRepository implements MissingTranslationRepository
             return null;
         }
 
-        // Get the translation for the given key
         $value = Lang::get($key, [], $locale);
 
-        // Return null if the value is an array
         if (is_array($value)) {
             return null;
         }
@@ -47,71 +48,77 @@ class FileRepository implements MissingTranslationRepository
     }
 
     /**
-     * Get missing translations for the specified locales.
+     * Get the missing translations grouped by the given locales.
      *
-     * @return array - array of missing translations with key grouped by locale
+     * @param  array<int, string>  $locales
+     * @return array<string, array<string, string>>
      */
     public function getMissingTranslations(array $locales): array
     {
         return collect($locales)
-            ->mapWithKeys(function ($locale) {
-                $missing = collect(($this->collectMissingTranslationsAction)($locale));
-
-                return [$locale => $missing->toArray()];
-            })
-            ->toArray();
+            ->mapWithKeys(fn (string $locale) => [
+                $locale => ($this->collectMissingTranslationsAction)($locale),
+            ])
+            ->all();
     }
 
     /**
-     * Get missing translations for the specified locale.
+     * Get the missing translations for the given locale.
+     *
+     * @return array<string, string>
      */
     public function getMissingTranslationsForLocale(string $locale): array
     {
-        return collect(($this->collectMissingTranslationsAction)($locale))->toArray();
+        return ($this->collectMissingTranslationsAction)($locale);
     }
 
     /**
-     * Get missing translation keys for the specified locales.
+     * Get the missing translation keys grouped by the given locales.
      *
-     * @return array - array of missing translations keys grouped by locale
+     * @param  array<int, string>  $locales
+     * @return array<string, array<int, string>>
      */
     public function getMissingTranslationKeys(array $locales): array
     {
         return collect($locales)
-            ->mapWithKeys(function ($locale) {
-                $missing = collect(($this->collectMissingTranslationsAction)($locale));
-
-                return [$locale => $missing->keys()->toArray()];
-            })
-            ->toArray();
+            ->mapWithKeys(fn (string $locale) => [
+                $locale => array_keys(($this->collectMissingTranslationsAction)($locale)),
+            ])
+            ->all();
     }
 
     /**
-     * Get missing translation keys for the specified locale.
+     * Get the missing translation keys for the given locale.
      *
-     * @return array - array of missing translations keys
+     * @return array<int, string>
      */
     public function getMissingTranslationKeysForLocale(string $locale): array
     {
-        return collect(($this->collectMissingTranslationsAction)($locale))->keys()->toArray();
+        return array_keys(($this->collectMissingTranslationsAction)($locale));
     }
 
     /**
-     * Get all translation keys for the specified locale.
+     * Get every translation key defined across the given locales.
+     *
+     * @param  array<int, string>  $locales
+     * @return array<int, string>
      */
     public function getTranslationKeys(array $locales): array
     {
         return collect($locales)
-            ->reduce(function ($carry, $locale) {
-                return array_merge($carry, $this->getTranslationKeysForLocale($locale));
-            }, []);
+            ->reduce(
+                fn (array $carry, string $locale) => array_merge($carry, $this->getTranslationKeysForLocale($locale)),
+                [],
+            );
     }
 
     /**
-     * Get the translation keys for the specified locale.
+     * Get every translation key defined for the given locale.
+     *
+     * @return array<int, string>
      */
     protected function getTranslationKeysForLocale(string $locale): array
     {
-        return collect(($this->collectTranslationsAction)($locale))->keys()->toArray();
+        return array_keys(($this->collectTranslationsAction)($locale));
     }
 }

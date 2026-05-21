@@ -15,49 +15,47 @@ class CollectMissingTranslationsCommand extends Command
      */
     protected $signature = 'm2:collect-missing-translations
         {--L|locales=* : The locales to collect the missing translations for}
-        {--dry-run : Perform a dry run without collecting any missing translations}
-    ';
-    // {--F|force : Force the collection without asking for confirmation}
+        {--dry-run : Perform a dry run without persisting any results}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Collect missing translations for the specified locales.';
+    protected $description = 'Collect missing translations for the given locales.';
 
     /**
      * Execute the console command.
      */
     public function handle(): int
     {
-        // Get the locales to collect the missing translations for
-        $locales = ! empty($this->option('locales')) ? $this->option('locales') : config('missing-translations.locales');
+        $locales = ! empty($this->option('locales'))
+            ? $this->option('locales')
+            : config('missing-translations.locales');
 
         if (empty($locales)) {
-            $this->error('No locales passed ord specified in config/missing-translations.');
+            $this->error('No locales passed or specified in config/missing-translations.');
 
             return Command::FAILURE;
         }
 
-        // Get the language key diff
         $this->collectLangFileDiff($locales);
 
         return Command::SUCCESS;
     }
 
     /**
-     * Collect the missing translations for the specified locales.
+     * Collect and persist the missing translations for each locale.
+     *
+     * @param  array<int, string>  $locales
      */
     protected function collectLangFileDiff(array $locales): void
     {
-        // Get the main locale
         $mainLocale = config('missing-translations.main_locale');
 
         foreach ($locales as $locale) {
             $locale = str_replace('=', '', $locale);
 
-            // Skip the main locale
             if ($locale === $mainLocale) {
                 continue;
             }
@@ -65,27 +63,23 @@ class CollectMissingTranslationsCommand extends Command
             $diff = app(MissingTranslations::class)->repository()->getMissingTranslationsForLocale($locale);
 
             if (empty($diff)) {
-                $this->info("No missing translations found for locale '$locale'.");
+                $this->info("No missing translations found for locale '{$locale}'.");
 
                 continue;
             }
 
-            $this->info('Found '.count($diff)." missing translations for locale '$locale'.");
+            $this->info('Found '.count($diff)." missing translations for locale '{$locale}'.");
 
             if ($this->option('dry-run')) {
                 continue;
             }
 
-            collect($diff)->each(function ($value, $key) use ($locale) {
-                // Save the missing translations
-                MissingTranslation::firstOrCreate([
-                    'hash' => md5($key),
-                ], [
-                    'string' => $key,
-                    'locale' => $locale,
-                ]);
+            collect($diff)->each(function (string $value, string $key) use ($locale) {
+                MissingTranslation::firstOrCreate(
+                    ['hash' => md5($key)],
+                    ['string' => $key, 'locale' => $locale],
+                );
             });
         }
-
     }
 }

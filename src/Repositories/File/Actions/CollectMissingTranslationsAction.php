@@ -6,35 +6,38 @@ use Illuminate\Support\Arr;
 
 class CollectMissingTranslationsAction
 {
-    public function __invoke(
-        string $locale,
-        ?string $mainLocale = null,
-    ): array {
-        // Get the main locale
+    /**
+     * Collect the missing translations for the given locale.
+     *
+     * @return array<string, string>
+     */
+    public function __invoke(string $locale, ?string $mainLocale = null): array
+    {
         $mainLocale = $mainLocale ?? config('missing-translations.main_locale');
 
         return $this->getDiffForLocale($mainLocale, $locale);
     }
 
     /**
-     * Collect the missing translations for the specified locale.
+     * Compare each language file in the main locale against the given locale.
+     *
+     * @return array<string, string>
      */
     protected function getDiffForLocale(string $mainLocale, string $comparedLocale): array
     {
         $diff = [];
 
         $mainLocaleFiles = $this->getLangFiles($mainLocale);
-
-        // Get the language files for the main locale
-        $langFiles = $this->getLangFiles($comparedLocale);
+        $comparedLocaleFiles = $this->getLangFiles($comparedLocale);
 
         foreach ($mainLocaleFiles as $file => $path) {
             $mainContent = $this->getFileContent($path);
 
-            // json base is named after the locale
+            // JSON translation files are named after the locale, so adjust the
+            // lookup key to find the matching file in the compared locale.
             $file = str_ends_with($file, '.json') ? str_replace($mainLocale, $comparedLocale, $file) : $file;
 
-            $langContent = ! isset($langFiles[$file]) ? [] : $this->getFileContent($langFiles[$file]);
+            $langContent = isset($comparedLocaleFiles[$file]) ? $this->getFileContent($comparedLocaleFiles[$file]) : [];
 
             $diff = array_merge($diff, $this->getArrayDiffDotted($mainContent, $langContent, $file));
         }
@@ -43,27 +46,29 @@ class CollectMissingTranslationsAction
     }
 
     /**
-     * Get the difference between two arrays.
+     * Get the dotted-key diff between two translation arrays.
+     *
+     * @param  array<string, mixed>  $array1
+     * @param  array<string, mixed>  $array2
+     * @return array<string, mixed>
      */
     protected function getArrayDiffDotted(array $array1, array $array2, string $file = ''): array
     {
-        if (str_ends_with($file, '.php')) {
-            $file = str_replace(['.php'], '', $file).'.';
-        } else {
-            $file = '';
-        }
+        $prefix = str_ends_with($file, '.php') ? str_replace('.php', '', $file).'.' : '';
 
-        $array1 = Arr::dot($array1, $file);
-        $array2 = Arr::dot($array2, $file);
+        $array1 = Arr::dot($array1, $prefix);
+        $array2 = Arr::dot($array2, $prefix);
 
         return array_diff_key(
-            $array1 + $array2, // merge the arrays to get all keys
-            array_intersect_key($array1, $array2) // get the keys that are in both arrays
+            $array1 + $array2,
+            array_intersect_key($array1, $array2),
         );
     }
 
     /**
-     * Get the content of the specified file.
+     * Read and decode the contents of the given translation file.
+     *
+     * @return array<string, mixed>
      */
     protected function getFileContent(string $file): array
     {
@@ -71,36 +76,42 @@ class CollectMissingTranslationsAction
             return [];
         }
 
-        return str_ends_with($file, '.json') ? json_decode(file_get_contents($file), true) : require $file;
+        if (str_ends_with($file, '.json')) {
+            $contents = file_get_contents($file);
+
+            return $contents === false ? [] : (json_decode($contents, true) ?? []);
+        }
+
+        return require $file;
     }
 
     /**
-     * Get the language files for the specified locale.
+     * Get the language files for the given locale, keyed by their relative path.
+     *
+     * @return array<string, string>
      */
     protected function getLangFiles(string $locale): array
     {
         $files = [];
 
-        $basePath = lang_path("$locale");
+        $basePath = lang_path($locale);
         if (is_dir($basePath)) {
-            $files = scandir($basePath);
+            $files = scandir($basePath) ?: [];
         }
 
-        if (file_exists(lang_path("$locale.json"))) {
-            $files[] = lang_path("$locale.json");
+        if (file_exists(lang_path("{$locale}.json"))) {
+            $files[] = lang_path("{$locale}.json");
         }
 
         return collect($files)
-            ->filter(function ($file) {
-                return ! in_array($file, ['.', '..']);
-            })
-            ->mapWithKeys(function ($file) use ($basePath) {
+            ->filter(fn (string $file) => ! in_array($file, ['.', '..']))
+            ->mapWithKeys(function (string $file) use ($basePath) {
                 if (str_starts_with($file, lang_path())) {
                     return [str_replace(lang_path(), '', $file) => $file];
                 }
 
                 return [$file => $basePath.'/'.$file];
             })
-            ->toArray();
+            ->all();
     }
 }
