@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Laravel 13 support in `composer.json` (Laravel 10, 11, 12, 13 are now supported).
 - `pint.json` with the `laravel` preset and a `composer format` / `composer lint` script pair.
 - PHPStan analysis raised to level 8 with array-shape and generic type hints throughout the package.
-- GitHub Actions workflows for `pint`, `phpstan`, and the full `tests` matrix (PHP 8.2–8.4 × Laravel 10–13).
+- GitHub Actions workflows for `pint`, `phpstan`, and the `tests` matrix (PHP 8.2–8.4 × Laravel 11–13). Laravel 10 remains in the composer constraints but is not exercised in CI: `pestphp/pest-plugin-laravel` dropped Laravel 10 in v3.0.
 - Granular publish tags (`missing-translations-config`, `missing-translations-views`).
 
 ### Changed

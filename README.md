@@ -24,6 +24,10 @@ The package ships two interchangeable repositories:
 - PHP 8.2, 8.3, or 8.4
 - Laravel 10, 11, 12, or 13
 
+> Laravel 10 is included in the composer constraints for legacy applications,
+> but is not exercised in CI: `pestphp/pest-plugin-laravel` v3+ dropped
+> Laravel 10. New projects should use Laravel 11 or later.
+
 ## Installation
 
 ```bash
