@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-05-21
+
 ### Added
 - Laravel 13 support in `composer.json` (Laravel 10, 11, 12, 13 are now supported).
 - `pint.json` with the `laravel` preset and a `composer format` / `composer lint` script pair.
@@ -69,7 +71,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Service provider, Eloquent model, controller, view, and route prefix configuration.
 - `Lang::handleMissingKeysUsing()` integration to record missing translation keys on the fly.
 
-[Unreleased]: https://github.com/mindtwo/missing-translations/compare/1.1.3...HEAD
+[Unreleased]: https://github.com/mindtwo/missing-translations/compare/1.2.0...HEAD
+[1.2.0]: https://github.com/mindtwo/missing-translations/compare/1.1.3...1.2.0
 [1.1.3]: https://github.com/mindtwo/missing-translations/compare/1.1.2...1.1.3
 [1.1.2]: https://github.com/mindtwo/missing-translations/compare/1.1.1...1.1.2
 [1.1.1]: https://github.com/mindtwo/missing-translations/compare/1.1...1.1.1
