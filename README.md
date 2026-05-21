@@ -1,60 +1,111 @@
-# laravel-missing-translations
+# Laravel Missing Translations
 
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Software License][ico-license]](LICENSE.md)
-[![Build Status][ico-travis]][link-travis]
-[![Coverage Status][ico-scrutinizer]][link-scrutinizer]
-[![Quality Score][ico-code-quality]][link-code-quality]
-[![Total Downloads][ico-downloads]][link-downloads]
+[![Tests][ico-tests]][link-tests]
+[![PHPStan][ico-phpstan]][link-phpstan]
+[![Total Downloads][ico-downloads]][link-packagist]
 
-This is where your description should go. Try and limit it to a paragraph or two, and maybe throw in a mention of what
-PSRs you support to avoid any confusion with users and contributors.
+`mindtwo/laravel-missing-translations` lists every translation key your
+application has used together with the value for every configured locale.
+Missing keys are highlighted, optionally persisted to the database via
+`Lang::handleMissingKeysUsing()`, and discoverable through a single
+inspection route.
 
-## Structure
+The package ships two interchangeable repositories:
 
-If any of the following are applicable to your project, then the directory structure should follow industry best practices by being named the following.
+- A **file repository** that diffs every translation file in the configured
+  main locale against the comparison locales.
+- A **database repository** backed by a `missing_translations` table,
+  populated automatically as the application runs.
 
+## Requirements
+
+- PHP 8.2, 8.3, or 8.4
+- Laravel 10, 11, 12, or 13
+
+## Installation
+
+```bash
+composer require mindtwo/laravel-missing-translations
 ```
-bin/        
-config/
-src/
-tests/
-vendor/
+
+Publish the configuration file (and views, if you intend to customise them):
+
+```bash
+php artisan vendor:publish --tag=missing-translations-config
+php artisan vendor:publish --tag=missing-translations-views
 ```
 
+Run the package migration to enable the database repository:
 
-## Install
-
-Via Composer
-
-``` bash
-$ composer require mindtwo/missing-translations
+```bash
+php artisan migrate
 ```
+
+## Configuration
+
+`config/missing-translations.php` exposes the following options:
+
+| Key | Description |
+| --- | --- |
+| `allowed_environments` | Environments where the inspection route is registered. |
+| `main_locale` | Locale used as the source of truth when collecting diffs. |
+| `locales` | Comparison locales. |
+| `log_missing_keys` | Persist keys reported by `Lang::handleMissingKeysUsing()`. |
+| `authorization.gate` | `false` to disable, `true` for the default `viewMissingTranslations` gate, or a custom gate name. |
+| `authorization.middleware` | Middleware applied to the inspection route. |
+| `route.prefix` | URL prefix for the inspection route. Defaults to `missing-translations`. |
+| `repositories.default` | Default repository (`file` or `database`). |
+| `repositories.sources` | Map of repository name → implementation class. |
 
 ## Usage
 
-``` php
-$skeleton = new mindtwo\\LaravelMissingTranslations();
-echo $skeleton->echoPhrase('Hello, League!');
+Visit `/<prefix>` (defaults to `/missing-translations`) in an allowed
+environment to render the translation table. Query parameters:
+
+- `?only_missing=1` — show only keys that are missing in at least one locale.
+- `?exclude[]=de&exclude[]=fr` — hide one or more locales.
+- `?repo=database` — switch to the database repository for the current request.
+
+### Collecting missing keys manually
+
+```bash
+php artisan m2:collect-missing-translations --locales=de --locales=fr
+php artisan m2:collect-missing-translations --dry-run
 ```
 
-## Change log
+### Resolving a repository in code
 
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
+```php
+use mindtwo\LaravelMissingTranslations\Services\MissingTranslations;
+
+$missing = app(MissingTranslations::class)
+    ->repository('file')
+    ->getMissingTranslationsForLocale('de');
+```
 
 ## Testing
 
-``` bash
-$ composer test
+```bash
+composer test
+composer analyse
+composer lint
+composer format
 ```
+
+## Changelog
+
+See [CHANGELOG](CHANGELOG.md) for a list of recent changes.
 
 ## Contributing
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) and [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md) for details.
+See [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## Security
 
-If you discover any security related issues, please email info@mindtwo.de instead of using the issue tracker.
+If you discover a security issue, please email `info@mindtwo.de` instead of
+opening a public issue.
 
 ## Credits
 
@@ -63,19 +114,16 @@ If you discover any security related issues, please email info@mindtwo.de instea
 
 ## License
 
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+The MIT License (MIT). See [LICENSE.md](LICENSE.md).
 
-[ico-version]: https://img.shields.io/packagist/v/mindtwo/missing-translations.svg?style=flat-square
+[ico-version]: https://img.shields.io/packagist/v/mindtwo/laravel-missing-translations.svg?style=flat-square
 [ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
-[ico-travis]: https://img.shields.io/travis/mindtwo/missing-translations/master.svg?style=flat-square
-[ico-scrutinizer]: https://img.shields.io/scrutinizer/coverage/g/mindtwo/missing-translations.svg?style=flat-square
-[ico-code-quality]: https://img.shields.io/scrutinizer/g/mindtwo/missing-translations.svg?style=flat-square
-[ico-downloads]: https://img.shields.io/packagist/dt/mindtwo/missing-translations.svg?style=flat-square
+[ico-downloads]: https://img.shields.io/packagist/dt/mindtwo/laravel-missing-translations.svg?style=flat-square
+[ico-tests]: https://img.shields.io/github/actions/workflow/status/mindtwo/missing-translations/run-tests.yml?branch=master&label=tests&style=flat-square
+[ico-phpstan]: https://img.shields.io/github/actions/workflow/status/mindtwo/missing-translations/phpstan.yml?branch=master&label=phpstan&style=flat-square
 
-[link-packagist]: https://packagist.org/packages/mindtwo/missing-translations
-[link-travis]: https://travis-ci.org/mindtwo/missing-translations
-[link-scrutinizer]: https://scrutinizer-ci.com/g/mindtwo/missing-translations/code-structure
-[link-code-quality]: https://scrutinizer-ci.com/g/mindtwo/missing-translations
-[link-downloads]: https://packagist.org/packages/mindtwo/missing-translations
+[link-packagist]: https://packagist.org/packages/mindtwo/laravel-missing-translations
+[link-tests]: https://github.com/mindtwo/missing-translations/actions/workflows/run-tests.yml
+[link-phpstan]: https://github.com/mindtwo/missing-translations/actions/workflows/phpstan.yml
 [link-author]: https://github.com/mindtwo
 [link-contributors]: ../../contributors
