@@ -1,7 +1,12 @@
-build
+/build
+/vendor
 composer.lock
-vendor
 phpcs.xml
 phpunit.xml
 
 .phpunit*
+.phpunit.result.cache
+.DS_Store
+.idea
+.vscode
+/.claude
